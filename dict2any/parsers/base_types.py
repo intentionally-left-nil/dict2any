@@ -19,7 +19,7 @@ class BaseParser(Parser):
                 return False
 
     def parse(self, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
-        return field_type(data)
+        return data if stage == Stage.Exact else field_type(data)
 
 
 def create_base_parser(field_type: type) -> type[Parser]:
