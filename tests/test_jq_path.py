@@ -1,5 +1,6 @@
-from dict2any.jq_path import JqPath, JqPathPart
 import pytest
+
+from dict2any.jq_path import JqPath, JqPathPart
 
 
 def test_parse_empty():
