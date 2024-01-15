@@ -1,4 +1,3 @@
-from dict2any.jq_path import JqPath
 from dict2any.parsers.base_types import (
     BaseDictParser,
     BaseListParser,

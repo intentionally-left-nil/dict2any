@@ -1,12 +1,12 @@
 from unittest.mock import Mock
 
+from dict2any.jq_path import JqPath
 from dict2any.parsers import (
     BaseDictParser,
     BaseListParser,
     BoolParser,
     FloatParser,
     IntParser,
-    JqPath,
     Stage,
     StringParser,
 )
@@ -36,7 +36,7 @@ def test_parse(path: JqPath):
     assert BoolParser().parse(Stage.Exact, path, bool, True, Mock()) is True
     assert IntParser().parse(Stage.Exact, path, int, 42, Mock()) == 42
     assert FloatParser().parse(Stage.Exact, path, float, 42.0, Mock()) == 42.0
-    assert StringParser().parse(Stage.Exact, path, str, 42, Mock()) == "42"
+    assert StringParser().parse(Stage.Exact, path, str, "42", Mock()) == "42"
     assert BaseListParser().parse(Stage.Exact, path, list, ['hello', 'world'], Mock()) == ['hello', 'world']
     assert BaseDictParser().parse(Stage.Exact, path, dict, {"hello": "world"}, Mock()) == {"hello": "world"}
 

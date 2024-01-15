@@ -1,6 +1,7 @@
 from typing import Any
 
-from dict2any.parsers import JqPath, Parser, Stage, Subparse
+from dict2any.jq_path import JqPath
+from dict2any.parsers.parser import Parser, Stage, Subparse
 
 
 class BaseParser(Parser):
