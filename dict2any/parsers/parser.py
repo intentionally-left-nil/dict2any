@@ -11,7 +11,7 @@ class Stage(StrEnum):
 
 
 class Subparse(Protocol):
-    def __call__(self, stage: Stage, path: JqPath, field_type: type, data: Any) -> Any:
+    def __call__(self, *, path: JqPath, field_type: type, data: Any) -> Any:
         ...
 
 
