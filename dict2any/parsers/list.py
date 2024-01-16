@@ -12,11 +12,11 @@ class ListParser(Parser):
             case Stage.Exact:
                 return field_type is list or get_origin(field_type) is list
             case Stage.Fallback:
+                # Check for mutablesequence instead of sequence to allow parsing lists, but not tuples
                 if isclass(field_type) and issubclass(field_type, MutableSequence):
                     return True
                 origin = get_origin(field_type)
-                # Make sure to only try parsing mutable sequences, not tuples
-                return isclass(origin) and issubclass(origin, list)
+                return isclass(origin) and issubclass(origin, MutableSequence)
             case _:
                 return False
 

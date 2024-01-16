@@ -89,6 +89,8 @@ def test_can_parse_exact(field_type: type, expected: bool, path: JqPath):
         (my_data_types['my_int_list'], True),
         (my_data_types['my_str_list'], True),
         (my_data_types['my_list_list'], True),
+        (my_data_types['my_custom_sequence'], True),
+        (my_data_types['my_generic_sequence'], True),
         (my_data_types['my_tuple'], False),
         (my_data_types['my_int_tuple'], False),
         (my_data_types['my_list_tuple'], False),
@@ -156,6 +158,3 @@ def test_parse_fallback(field_type: type, data: Any, expected: Any, path: JqPath
 def test_parse_fallbock_fails_for_non_lists(path: JqPath, subparser: Mock):
     with pytest.raises(ValueError):
         ListParser().parse(Stage.Fallback, path, list, {"hello": "world"}, subparser)
-
-
-ListParser().parse(Stage.Override, JqPath.parse('.'), my_data_types['my_generic_sequence'], [1, 2, 3], Mock())
