@@ -57,27 +57,23 @@ def test_can_parse_subdict(path: JqPath):
 
 
 def test_parse(path: JqPath, subparser: Mock):
-    assert BoolParser().parse(stage=Stage.Exact, path=path, field_type=bool, data=True, subparse=subparser) is True
-    assert IntParser().parse(stage=Stage.Exact, path=path, field_type=int, data=42, subparse=subparser) == 42
-    assert FloatParser().parse(stage=Stage.Exact, path=path, field_type=float, data=42.0, subparse=subparser) == 42.0
-    assert StringParser().parse(stage=Stage.Exact, path=path, field_type=str, data="42", subparse=subparser) == "42"
-    assert StringParser().parse(
-        stage=Stage.Exact, path=path, field_type=MyStr, data=MyStr("42"), subparse=subparser
-    ) == MyStr("42")
-    assert StringParser().parse(
-        stage=Stage.Fallback, path=path, field_type=MyStr, data=MyStr("42"), subparse=subparser
-    ) == MyStr("42")
+    assert BoolParser().parse(path=path, field_type=bool, data=True, subparse=subparser) is True
+    assert IntParser().parse(path=path, field_type=int, data=42, subparse=subparser) == 42
+    assert FloatParser().parse(path=path, field_type=float, data=42.0, subparse=subparser) == 42.0
+    assert StringParser().parse(path=path, field_type=str, data="42", subparse=subparser) == "42"
+    assert StringParser().parse(path=path, field_type=MyStr, data=MyStr("42"), subparse=subparser) == MyStr("42")
+    assert StringParser().parse(path=path, field_type=MyStr, data=MyStr("42"), subparse=subparser) == MyStr("42")
 
 
 def test_parse_failure(path: JqPath, subparser: Mock):
     with pytest.raises(ValueError):
-        StringParser().parse(stage=Stage.Exact, path=path, field_type=str, data=42, subparse=subparser)
+        StringParser().parse(path=path, field_type=str, data=42, subparse=subparser)
 
     with pytest.raises(ValueError):
-        StringParser().parse(stage=Stage.Fallback, path=path, field_type=str, data=42, subparse=subparser)
+        StringParser().parse(path=path, field_type=str, data=42, subparse=subparser)
 
     with pytest.raises(ValueError):
-        StringParser().parse(stage=Stage.Exact, path=path, field_type=MyStr, data=42, subparse=subparser)
+        StringParser().parse(path=path, field_type=MyStr, data=42, subparse=subparser)
 
     with pytest.raises(ValueError):
-        StringParser().parse(stage=Stage.Exact, path=path, field_type=str, data=None, subparse=subparser)
+        StringParser().parse(path=path, field_type=str, data=None, subparse=subparser)

@@ -115,34 +115,6 @@ def test_can_parse_override(path: JqPath):
         (my_data_types['my_str_list'], ["a"], ["a"]),
         (list, (1, 2), [1, 2]),
         (list, [[1], [2, 3]], [[1], [2, 3]]),
-    ],
-)
-def test_parse_exact(field_type: type, data: Any, expected: Any, path: JqPath, subparser: Mock):
-    assert (
-        ListParser().parse(stage=Stage.Exact, path=path, field_type=field_type, data=data, subparse=subparser)
-        == expected
-    )
-    assert subparser.call_count == len(data)
-    for i, _ in enumerate(data):
-        assert subparser.call_args_list[i].kwargs["path"].path() == f"{path.path()}[{i}]"
-        expected_field_type = Any if field_type is list else type(data[0])
-        assert subparser.call_args_list[i].kwargs["field_type"] == expected_field_type
-        assert subparser.call_args_list[i].kwargs["data"] == data[i]
-
-
-def test_parse_fails_for_non_lists(path: JqPath, subparser: Mock):
-    with pytest.raises(ValueError):
-        ListParser().parse(stage=Stage.Exact, path=path, field_type=list, data={"hello": "world"}, subparse=subparser)
-
-    with pytest.raises(ValueError):
-        ListParser().parse(
-            stage=Stage.Fallback, path=path, field_type=list, data={"hello": "world"}, subparse=subparser
-        )
-
-
-@pytest.mark.parametrize(
-    ['field_type', 'data', 'expected'],
-    [
         (SubList, [], SubList([])),
         (SubList, [1], SubList([1])),
         (SubList, (1, 2), SubList([1, 2])),
@@ -151,14 +123,19 @@ def test_parse_fails_for_non_lists(path: JqPath, subparser: Mock):
         (my_data_types['my_generic_sequence'], [1, 2], MyGenericCustomSequence[int]([1, 2])),
     ],
 )
-def test_parse_fallback(field_type: type, data: Any, expected: Any, path: JqPath, subparser: Mock):
-    assert (
-        ListParser().parse(stage=Stage.Fallback, path=path, field_type=field_type, data=data, subparse=subparser)
-        == expected
-    )
+def test_parse(field_type: type, data: Any, expected: Any, path: JqPath, subparser: Mock):
+    assert ListParser().parse(path=path, field_type=field_type, data=data, subparse=subparser) == expected
     assert subparser.call_count == len(data)
     for i, _ in enumerate(data):
         assert subparser.call_args_list[i].kwargs["path"].path() == f"{path.path()}[{i}]"
         expected_field_type = Any if field_type in (list, SubList, MyCustomSequence) else type(data[0])
         assert subparser.call_args_list[i].kwargs["field_type"] == expected_field_type
         assert subparser.call_args_list[i].kwargs["data"] == data[i]
+
+
+def test_parse_fails_for_non_lists(path: JqPath, subparser: Mock):
+    with pytest.raises(ValueError):
+        ListParser().parse(path=path, field_type=list, data={"hello": "world"}, subparse=subparser)
+
+    with pytest.raises(ValueError):
+        ListParser().parse(path=path, field_type=list, data={"hello": "world"}, subparse=subparser)

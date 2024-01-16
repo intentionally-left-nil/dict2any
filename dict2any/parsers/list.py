@@ -20,7 +20,7 @@ class ListParser(Parser):
             case _:
                 return False
 
-    def parse(self, *, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
+    def parse(self, *, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
         if not isinstance(data, Sequence):
             raise ValueError(f"Invalid type: {type(data)}")
 
