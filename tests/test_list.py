@@ -1,6 +1,6 @@
 from collections.abc import MutableSequence
 from dataclasses import dataclass, fields
-from typing import Any
+from typing import Any, Generic, TypeVar
 from unittest.mock import Mock
 
 import pytest
@@ -37,6 +37,13 @@ class MyCustomSequence(MutableSequence):
         return self.items.insert(index, val)
 
 
+T = TypeVar('T')
+
+
+class MyGenericCustomSequence(Generic[T], MyCustomSequence):
+    pass
+
+
 @dataclass
 class MyData:
     my_list: list
@@ -46,6 +53,8 @@ class MyData:
     my_tuple: tuple
     my_int_tuple: tuple[int]
     my_list_tuple: tuple[list]
+    my_custom_sequence: MyCustomSequence
+    my_generic_sequence: MyGenericCustomSequence[int]
 
 
 my_data_types = {field.name: field.type for field in fields(MyData)}
@@ -130,6 +139,8 @@ def test_parse_exact_fails_for_non_lists(path: JqPath, subparser: Mock):
         (SubList, [1], SubList([1])),
         (SubList, (1, 2), SubList([1, 2])),
         (MyCustomSequence, [1, 2], MyCustomSequence([1, 2])),
+        (my_data_types['my_custom_sequence'], [1, 2], MyCustomSequence([1, 2])),
+        (my_data_types['my_generic_sequence'], [1, 2], MyGenericCustomSequence[int]([1, 2])),
     ],
 )
 def test_parse_fallback(field_type: type, data: Any, expected: Any, path: JqPath, subparser: Mock):
@@ -145,3 +156,6 @@ def test_parse_fallback(field_type: type, data: Any, expected: Any, path: JqPath
 def test_parse_fallbock_fails_for_non_lists(path: JqPath, subparser: Mock):
     with pytest.raises(ValueError):
         ListParser().parse(Stage.Fallback, path, list, {"hello": "world"}, subparser)
+
+
+ListParser().parse(Stage.Override, JqPath.parse('.'), my_data_types['my_generic_sequence'], [1, 2, 3], Mock())
