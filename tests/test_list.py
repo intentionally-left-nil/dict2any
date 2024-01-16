@@ -110,6 +110,7 @@ def test_can_parse_override(path: JqPath):
         (list, [], []),
         (list, [1], [1]),
         (list, [1, 2], [1, 2]),
+        (list, MyCustomSequence([1, 2]), [1, 2]),
         (my_data_types['my_int_list'], [1, 2], [1, 2]),
         (my_data_types['my_str_list'], ["a"], ["a"]),
         (list, (1, 2), [1, 2]),
@@ -126,12 +127,12 @@ def test_parse_exact(field_type: type, data: Any, expected: Any, path: JqPath, s
         assert subparser.call_args_list[i].kwargs["data"] == data[i]
 
 
-def test_parse_exact_fails_for_non_lists(path: JqPath, subparser: Mock):
-    with pytest.raises(ValueError):
-        ListParser().parse(Stage.Exact, path, list, SubList(), subparser)
-
+def test_parse_fails_for_non_lists(path: JqPath, subparser: Mock):
     with pytest.raises(ValueError):
         ListParser().parse(Stage.Exact, path, list, {"hello": "world"}, subparser)
+
+    with pytest.raises(ValueError):
+        ListParser().parse(Stage.Fallback, path, list, {"hello": "world"}, subparser)
 
 
 @pytest.mark.parametrize(
@@ -153,8 +154,3 @@ def test_parse_fallback(field_type: type, data: Any, expected: Any, path: JqPath
         expected_field_type = Any if field_type in (list, SubList, MyCustomSequence) else type(data[0])
         assert subparser.call_args_list[i].kwargs["field_type"] == expected_field_type
         assert subparser.call_args_list[i].kwargs["data"] == data[i]
-
-
-def test_parse_fallbock_fails_for_non_lists(path: JqPath, subparser: Mock):
-    with pytest.raises(ValueError):
-        ListParser().parse(Stage.Fallback, path, list, {"hello": "world"}, subparser)

@@ -21,13 +21,8 @@ class ListParser(Parser):
                 return False
 
     def parse(self, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
-        match stage:
-            case Stage.Exact:
-                if not type(data) in (list, tuple):
-                    raise ValueError(f"Invalid type: {type(data)}")
-            case Stage.Fallback:
-                if not isinstance(data, Sequence):
-                    raise ValueError(f"Invalid type: {type(data)}")
+        if not isinstance(data, Sequence):
+            raise ValueError(f"Invalid type: {type(data)}")
 
         args = get_args(field_type)
         sub_type = Any if len(args) == 0 else args[0]
