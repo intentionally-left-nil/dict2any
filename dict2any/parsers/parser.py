@@ -19,5 +19,5 @@ class Parser(Protocol):
     def can_parse(self, *, stage: Stage, path: JqPath, field_type: type):
         ...
 
-    def parse(self, *, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
+    def parse(self, *, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
         ...
