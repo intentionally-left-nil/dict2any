@@ -21,15 +21,9 @@ class BaseParser(Parser):
                 return False
 
     def parse(self, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
-        match stage:
-            case Stage.Exact:
-                if type(data) is not self.field_type:
-                    raise ValueError(f"Invalid type: {type(data)}")
-                return data
-            case Stage.Fallback:
-                if not isinstance(data, self.field_type):
-                    raise ValueError(f"Invalid type: {type(data)}")
-                return field_type(data)
+        if not isinstance(data, self.field_type):
+            raise ValueError(f"Invalid type: {type(data)}")
+        return data
 
 
 def create_base_parser(field_type: type) -> type[Parser]:

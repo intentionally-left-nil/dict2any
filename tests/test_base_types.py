@@ -61,6 +61,7 @@ def test_parse(path: JqPath, subparser: Mock):
     assert IntParser().parse(Stage.Exact, path, int, 42, subparser) == 42
     assert FloatParser().parse(Stage.Exact, path, float, 42.0, subparser) == 42.0
     assert StringParser().parse(Stage.Exact, path, str, "42", subparser) == "42"
+    assert StringParser().parse(Stage.Exact, path, MyStr, MyStr("42"), subparser) == MyStr("42")
     assert StringParser().parse(Stage.Fallback, path, MyStr, MyStr("42"), subparser) == MyStr("42")
 
 
