@@ -51,11 +51,6 @@ class MyData:
 my_data_types = {field.name: field.type for field in fields(MyData)}
 
 
-@pytest.fixture
-def subparser() -> Mock:
-    return Mock(side_effect=lambda *args, **kwargs: kwargs['data'])
-
-
 @pytest.mark.parametrize(
     ['field_type', 'expected'],
     [

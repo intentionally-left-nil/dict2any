@@ -1,3 +1,4 @@
+from inspect import isclass
 from typing import Any
 
 from dict2any.jq_path import JqPath
@@ -15,12 +16,20 @@ class BaseParser(Parser):
             case Stage.Exact:
                 return field_type is self.field_type
             case Stage.Fallback:
-                return issubclass(field_type, self.field_type)
+                return isclass(field_type) and issubclass(field_type, self.field_type)
             case _:
                 return False
 
     def parse(self, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
-        return data if stage == Stage.Exact else field_type(data)
+        match stage:
+            case Stage.Exact:
+                if type(data) is not self.field_type:
+                    raise ValueError(f"Invalid type: {type(data)}")
+                return data
+            case Stage.Fallback:
+                if not isinstance(data, self.field_type):
+                    raise ValueError(f"Invalid type: {type(data)}")
+                return field_type(data)
 
 
 def create_base_parser(field_type: type) -> type[Parser]:
@@ -35,5 +44,3 @@ BoolParser = create_base_parser(bool)
 IntParser = create_base_parser(int)
 FloatParser = create_base_parser(float)
 StringParser = create_base_parser(str)
-BaseListParser = create_base_parser(list)
-BaseDictParser = create_base_parser(dict)

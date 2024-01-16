@@ -1,57 +1,78 @@
+from dataclasses import dataclass, fields
 from unittest.mock import Mock
+
+import pytest
 
 from dict2any.jq_path import JqPath
 from dict2any.parsers import (
-    BaseDictParser,
-    BaseListParser,
     BoolParser,
     FloatParser,
     IntParser,
+    Parser,
     Stage,
     StringParser,
 )
 
 
-def test_can_parse(path: JqPath):
-    class Example:
+@dataclass
+class MyData:
+    my_int_list: list[int]
+
+
+int_list_type = fields(MyData)[0].type
+
+
+class MyStr(str):
+    pass
+
+
+@pytest.mark.parametrize(
+    ['parser', 'stage', 'field_type', 'expected'],
+    [
+        (BoolParser(), Stage.Exact, bool, True),
+        (IntParser(), Stage.Exact, int, True),
+        (FloatParser(), Stage.Exact, float, True),
+        (StringParser(), Stage.Exact, str, True),
+        (StringParser(), Stage.Exact, int_list_type, False),
+        (BoolParser(), Stage.Exact, int, False),
+        (IntParser(), Stage.Exact, float, False),
+        (FloatParser(), Stage.Exact, str, False),
+        (StringParser(), Stage.Exact, list, False),
+        (StringParser(), Stage.Fallback, MyStr, True),
+        (StringParser(), Stage.Fallback, int_list_type, False),
+        (StringParser(), Stage.Fallback, None, False),
+    ],
+)
+def test_can_parse(parser: Parser, stage: Stage, field_type: type, expected: bool, path: JqPath):
+    assert parser.can_parse(stage, path, field_type) == expected
+    assert parser.can_parse(Stage.Override, path, field_type) == False
+
+
+def test_can_parse_subdict(path: JqPath):
+    class MyStr(str):
         pass
 
-    for stage in [Stage.Exact, Stage.Fallback, Stage.Override]:
-        assert BoolParser().can_parse(stage, path, bool) == (stage != Stage.Override)
-        assert IntParser().can_parse(stage, path, int) == (stage != Stage.Override)
-        assert FloatParser().can_parse(stage, path, float) == (stage != Stage.Override)
-        assert StringParser().can_parse(stage, path, str) == (stage != Stage.Override)
-        assert BaseListParser().can_parse(stage, path, list) == (stage != Stage.Override)
-        assert BaseDictParser().can_parse(stage, path, dict) == (stage != Stage.Override)
-
-        assert BoolParser().can_parse(stage, path, Example) is False
-        assert IntParser().can_parse(stage, path, Example) is False
-        assert FloatParser().can_parse(stage, path, Example) is False
-        assert StringParser().can_parse(stage, path, Example) is False
-        assert BaseListParser().can_parse(stage, path, Example) is False
-        assert BaseDictParser().can_parse(stage, path, Example) is False
+    assert StringParser().can_parse(Stage.Exact, path, MyStr) is False
+    assert StringParser().can_parse(Stage.Fallback, path, MyStr) is True
 
 
-def test_parse(path: JqPath):
-    assert BoolParser().parse(Stage.Exact, path, bool, True, Mock()) is True
-    assert IntParser().parse(Stage.Exact, path, int, 42, Mock()) == 42
-    assert FloatParser().parse(Stage.Exact, path, float, 42.0, Mock()) == 42.0
-    assert StringParser().parse(Stage.Exact, path, str, "42", Mock()) == "42"
-    assert BaseListParser().parse(Stage.Exact, path, list, ['hello', 'world'], Mock()) == ['hello', 'world']
-    assert BaseDictParser().parse(Stage.Exact, path, dict, {"hello": "world"}, Mock()) == {"hello": "world"}
+def test_parse(path: JqPath, subparser: Mock):
+    assert BoolParser().parse(Stage.Exact, path, bool, True, subparser) is True
+    assert IntParser().parse(Stage.Exact, path, int, 42, subparser) == 42
+    assert FloatParser().parse(Stage.Exact, path, float, 42.0, subparser) == 42.0
+    assert StringParser().parse(Stage.Exact, path, str, "42", subparser) == "42"
+    assert StringParser().parse(Stage.Fallback, path, MyStr, MyStr("42"), subparser) == MyStr("42")
 
 
-def test_dict_subclass(path: JqPath):
-    class MyDict(dict):
-        pass
+def test_parse_failure(path: JqPath, subparser: Mock):
+    with pytest.raises(ValueError):
+        StringParser().parse(Stage.Exact, path, str, 42, subparser)
 
-    assert BaseDictParser().can_parse(Stage.Exact, path, MyDict) is False
-    assert BaseDictParser().can_parse(Stage.Fallback, path, MyDict) is True
-    actual = BaseDictParser().parse(Stage.Fallback, path, MyDict, {"hello": "world"}, Mock())
-    assert isinstance(actual, MyDict)
-    assert actual == {"hello": "world"}
-    actual = BaseDictParser().parse(Stage.Fallback, path, dict, {"hello": "world"}, Mock())
-    assert isinstance(actual, MyDict) is False
+    with pytest.raises(ValueError):
+        StringParser().parse(Stage.Fallback, path, str, 42, subparser)
 
+    with pytest.raises(ValueError):
+        StringParser().parse(Stage.Exact, path, MyStr, 42, subparser)
 
-BoolParser().can_parse(Stage.Exact, JqPath.parse('.'), bool)
+    with pytest.raises(ValueError):
+        StringParser().parse(Stage.Exact, path, str, None, subparser)
