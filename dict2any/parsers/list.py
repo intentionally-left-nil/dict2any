@@ -7,7 +7,7 @@ from dict2any.parsers.parser import Parser, Stage, Subparse
 
 
 class ListParser(Parser):
-    def can_parse(self, stage: Stage, path: JqPath, field_type: type):
+    def can_parse(self, *, stage: Stage, path: JqPath, field_type: type):
         match stage:
             case Stage.Exact:
                 return field_type is list or get_origin(field_type) is list
@@ -20,7 +20,7 @@ class ListParser(Parser):
             case _:
                 return False
 
-    def parse(self, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
+    def parse(self, *, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
         if not isinstance(data, Sequence):
             raise ValueError(f"Invalid type: {type(data)}")
 
