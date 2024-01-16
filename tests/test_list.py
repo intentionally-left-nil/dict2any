@@ -76,7 +76,7 @@ my_data_types = {field.name: field.type for field in fields(MyData)}
     ],
 )
 def test_can_parse_exact(field_type: type, expected: bool, path: JqPath):
-    assert ListParser().can_parse(Stage.Exact, path, field_type) == expected
+    assert ListParser().can_parse(stage=Stage.Exact, path=path, field_type=field_type) == expected
 
 
 @pytest.mark.parametrize(
@@ -97,11 +97,11 @@ def test_can_parse_exact(field_type: type, expected: bool, path: JqPath):
     ],
 )
 def test_can_parse_fallback(field_type: type, expected: bool, path: JqPath):
-    assert ListParser().can_parse(Stage.Fallback, path, field_type) == expected
+    assert ListParser().can_parse(stage=Stage.Fallback, path=path, field_type=field_type) == expected
 
 
 def test_can_parse_override(path: JqPath):
-    assert ListParser().can_parse(Stage.Override, path, list) == False
+    assert ListParser().can_parse(stage=Stage.Override, path=path, field_type=list) == False
 
 
 @pytest.mark.parametrize(
@@ -118,7 +118,10 @@ def test_can_parse_override(path: JqPath):
     ],
 )
 def test_parse_exact(field_type: type, data: Any, expected: Any, path: JqPath, subparser: Mock):
-    assert ListParser().parse(Stage.Exact, path, field_type, data, subparser) == expected
+    assert (
+        ListParser().parse(stage=Stage.Exact, path=path, field_type=field_type, data=data, subparse=subparser)
+        == expected
+    )
     assert subparser.call_count == len(data)
     for i, _ in enumerate(data):
         assert subparser.call_args_list[i].kwargs["path"].path() == f"{path.path()}[{i}]"
@@ -129,10 +132,12 @@ def test_parse_exact(field_type: type, data: Any, expected: Any, path: JqPath, s
 
 def test_parse_fails_for_non_lists(path: JqPath, subparser: Mock):
     with pytest.raises(ValueError):
-        ListParser().parse(Stage.Exact, path, list, {"hello": "world"}, subparser)
+        ListParser().parse(stage=Stage.Exact, path=path, field_type=list, data={"hello": "world"}, subparse=subparser)
 
     with pytest.raises(ValueError):
-        ListParser().parse(Stage.Fallback, path, list, {"hello": "world"}, subparser)
+        ListParser().parse(
+            stage=Stage.Fallback, path=path, field_type=list, data={"hello": "world"}, subparse=subparser
+        )
 
 
 @pytest.mark.parametrize(
@@ -147,7 +152,10 @@ def test_parse_fails_for_non_lists(path: JqPath, subparser: Mock):
     ],
 )
 def test_parse_fallback(field_type: type, data: Any, expected: Any, path: JqPath, subparser: Mock):
-    assert ListParser().parse(Stage.Fallback, path, field_type, data, subparser) == expected
+    assert (
+        ListParser().parse(stage=Stage.Fallback, path=path, field_type=field_type, data=data, subparse=subparser)
+        == expected
+    )
     assert subparser.call_count == len(data)
     for i, _ in enumerate(data):
         assert subparser.call_args_list[i].kwargs["path"].path() == f"{path.path()}[{i}]"

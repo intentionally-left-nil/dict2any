@@ -11,7 +11,7 @@ class BaseParser(Parser):
     def __init__(self, field_type: type):
         self.field_type = field_type
 
-    def can_parse(self, stage: Stage, path: JqPath, field_type: type):
+    def can_parse(self, *, stage: Stage, path: JqPath, field_type: type):
         match stage:
             case Stage.Exact:
                 return field_type is self.field_type
@@ -20,7 +20,7 @@ class BaseParser(Parser):
             case _:
                 return False
 
-    def parse(self, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
+    def parse(self, *, stage: Stage, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
         if not isinstance(data, self.field_type):
             raise ValueError(f"Invalid type: {type(data)}")
         return data

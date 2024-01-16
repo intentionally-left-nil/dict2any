@@ -44,36 +44,40 @@ class MyStr(str):
     ],
 )
 def test_can_parse(parser: Parser, stage: Stage, field_type: type, expected: bool, path: JqPath):
-    assert parser.can_parse(stage, path, field_type) == expected
-    assert parser.can_parse(Stage.Override, path, field_type) == False
+    assert parser.can_parse(stage=stage, path=path, field_type=field_type) == expected
+    assert parser.can_parse(stage=Stage.Override, path=path, field_type=field_type) == False
 
 
 def test_can_parse_subdict(path: JqPath):
     class MyStr(str):
         pass
 
-    assert StringParser().can_parse(Stage.Exact, path, MyStr) is False
-    assert StringParser().can_parse(Stage.Fallback, path, MyStr) is True
+    assert StringParser().can_parse(stage=Stage.Exact, path=path, field_type=MyStr) is False
+    assert StringParser().can_parse(stage=Stage.Fallback, path=path, field_type=MyStr) is True
 
 
 def test_parse(path: JqPath, subparser: Mock):
-    assert BoolParser().parse(Stage.Exact, path, bool, True, subparser) is True
-    assert IntParser().parse(Stage.Exact, path, int, 42, subparser) == 42
-    assert FloatParser().parse(Stage.Exact, path, float, 42.0, subparser) == 42.0
-    assert StringParser().parse(Stage.Exact, path, str, "42", subparser) == "42"
-    assert StringParser().parse(Stage.Exact, path, MyStr, MyStr("42"), subparser) == MyStr("42")
-    assert StringParser().parse(Stage.Fallback, path, MyStr, MyStr("42"), subparser) == MyStr("42")
+    assert BoolParser().parse(stage=Stage.Exact, path=path, field_type=bool, data=True, subparse=subparser) is True
+    assert IntParser().parse(stage=Stage.Exact, path=path, field_type=int, data=42, subparse=subparser) == 42
+    assert FloatParser().parse(stage=Stage.Exact, path=path, field_type=float, data=42.0, subparse=subparser) == 42.0
+    assert StringParser().parse(stage=Stage.Exact, path=path, field_type=str, data="42", subparse=subparser) == "42"
+    assert StringParser().parse(
+        stage=Stage.Exact, path=path, field_type=MyStr, data=MyStr("42"), subparse=subparser
+    ) == MyStr("42")
+    assert StringParser().parse(
+        stage=Stage.Fallback, path=path, field_type=MyStr, data=MyStr("42"), subparse=subparser
+    ) == MyStr("42")
 
 
 def test_parse_failure(path: JqPath, subparser: Mock):
     with pytest.raises(ValueError):
-        StringParser().parse(Stage.Exact, path, str, 42, subparser)
+        StringParser().parse(stage=Stage.Exact, path=path, field_type=str, data=42, subparse=subparser)
 
     with pytest.raises(ValueError):
-        StringParser().parse(Stage.Fallback, path, str, 42, subparser)
+        StringParser().parse(stage=Stage.Fallback, path=path, field_type=str, data=42, subparse=subparser)
 
     with pytest.raises(ValueError):
-        StringParser().parse(Stage.Exact, path, MyStr, 42, subparser)
+        StringParser().parse(stage=Stage.Exact, path=path, field_type=MyStr, data=42, subparse=subparser)
 
     with pytest.raises(ValueError):
-        StringParser().parse(Stage.Exact, path, str, None, subparser)
+        StringParser().parse(stage=Stage.Exact, path=path, field_type=str, data=None, subparse=subparser)
