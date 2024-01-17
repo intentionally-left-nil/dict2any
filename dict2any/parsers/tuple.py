@@ -44,7 +44,7 @@ class NamedTupleParser(Parser):
         if not isinstance(data, Sequence) and not isinstance(data, Mapping):
             raise ValueError(f"Invalid type: {type(data)}")
 
-        sub_types = {}
+        sub_types: dict[str, type] = {}
         field_names = getattr(field_type, '_fields', tuple())
         if NamedTuple in getattr(field_type, '__orig_bases__', tuple()):
             type_hints = get_type_hints(field_type)
