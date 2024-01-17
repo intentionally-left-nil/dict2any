@@ -137,7 +137,7 @@ def test_cannot_parse_override(path: JqPath):
         (MyCustomMapping, {"hello": "world"}, MyCustomMapping({"hello": "world"})),
         (dict, MyCustomMutableMapping({"hello": "world"}), {"hello": "world"}),
         (MyCustomMutableMapping, {"hello": "world"}, MyCustomMutableMapping({"hello": "world"})),
-        (dict, defaultdict(list, {"hello": "world"}), {"hello": "world"}),
+        (dict, defaultdict(list, {"hello": "world"}), {"hello": "world"}),  # type: ignore
         (defaultdict, {"hello": "world"}, TypeError),
         (dict[str, Any], None, ValueError),
     ],
