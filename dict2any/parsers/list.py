@@ -10,7 +10,7 @@ class ListParser(Parser):
     def can_parse(self, *, stage: Stage, path: JqPath, field_type: type):
         match stage:
             case Stage.Exact:
-                return field_type is list or get_origin(field_type) is list
+                return field_type is list or (get_origin(field_type) is list)
             case Stage.Fallback:
                 # Check for mutablesequence instead of sequence to allow parsing lists, but not tuples
                 if isclass(field_type) and issubclass(field_type, MutableSequence):
