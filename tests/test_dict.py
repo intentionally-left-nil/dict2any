@@ -7,7 +7,7 @@ import pytest
 
 from dict2any.jq_path import JqPath
 from dict2any.parsers import Stage, Subparse
-from dict2any.parsers.dict import DictParser
+from dict2any.parsers.dict import DictParser, TypedDictParser
 
 
 class MyTypedDict(TypedDict):
@@ -19,6 +19,10 @@ class MyTypedDict(TypedDict):
 class MyPartialTypedDict(TypedDict, total=False):
     a: Required[int]
     b: str
+
+
+class MySubTypedDict(MyTypedDict):
+    pass
 
 
 class MyUserDict(UserDict):
@@ -105,14 +109,11 @@ class MyCustomMutableMapping(MutableMapping):
         (Stage.Fallback, defaultdict, True),
         (Stage.Fallback, None, False),
         (Stage.Fallback, list, False),
+        (Stage.Override, dict, False),
     ],
 )
 def test_can_parse(stage: Stage, field_type: Any, expected: bool, path: JqPath):
     assert DictParser().can_parse(stage=stage, path=path, field_type=field_type) == expected
-
-
-def test_cannot_parse_override(path: JqPath):
-    assert DictParser().can_parse(stage=Stage.Override, path=path, field_type=dict) == False
 
 
 @pytest.mark.parametrize(
@@ -148,3 +149,47 @@ def test_parse(field_type, data, expected, path: JqPath, subparser: Subparse):
             DictParser().parse(path=path, field_type=field_type, data=data, subparse=subparser)
     else:
         assert DictParser().parse(path=path, field_type=field_type, data=data, subparse=subparser) == expected
+
+
+@pytest.mark.parametrize(
+    ['stage', 'field_type', 'expected'],
+    [
+        (Stage.Exact, MyTypedDict, True),
+        (Stage.Exact, MyPartialTypedDict, True),
+        (Stage.Exact, MyPartialTypedDict, True),
+        (Stage.Exact, dict, False),
+        (Stage.Exact, MySubTypedDict, False),
+        (Stage.Exact, OrderedDict, False),
+        (Stage.Exact, dict[str, int], False),
+        (Stage.Exact, dict[str, str], False),
+        (Stage.Exact, list, False),
+        (Stage.Override, MyTypedDict, False),
+        (Stage.Fallback, MyTypedDict, False),
+    ],
+)
+def test_can_parse_typed_dict(stage: Stage, field_type: Any, expected: bool, path: JqPath):
+    assert TypedDictParser().can_parse(stage=stage, path=path, field_type=field_type) == expected
+
+
+@pytest.mark.parametrize(
+    ['field_type', "data", 'expected'],
+    [
+        (MyTypedDict, {"a": 1, "b": "hello"}, MyTypedDict(a=1, b="hello")),
+        (MyTypedDict, {"a": 1, "b": "hello", "c": True}, MyTypedDict(a=1, b="hello", c=True)),
+        (MyTypedDict, {"a": 1, "b": "hello", "bad_key": True}, ValueError),
+        (MyTypedDict, {"a": 1}, ValueError),
+        (MyTypedDict, {"a": 1, "b": 1}, ValueError),
+        (MyTypedDict, None, ValueError),
+        (MyPartialTypedDict, {"a": 1}, MyPartialTypedDict(a=1)),
+        (MyPartialTypedDict, {"a": 1, "b": "hello"}, MyPartialTypedDict(a=1, b="hello")),
+        (MyPartialTypedDict, {"a": 1, "b": "hello", "unknown": True}, MyPartialTypedDict(a=1, b="hello", unknown=True)),  # type: ignore
+        (MyPartialTypedDict, {"a": 1, "b": 1}, ValueError),
+        (MyPartialTypedDict, {"b": "hello"}, ValueError),
+    ],
+)
+def test_parse_typed_dict(field_type, data, expected, path: JqPath, subparser: Subparse):
+    if isclass(expected) and issubclass(expected, BaseException):
+        with pytest.raises(expected):
+            TypedDictParser().parse(path=path, field_type=field_type, data=data, subparse=subparser)
+    else:
+        assert TypedDictParser().parse(path=path, field_type=field_type, data=data, subparse=subparser) == expected
