@@ -43,6 +43,7 @@ The first parser which returns `True` to `can_parse` is the one that wins, and w
 - Override: This stage is checked first. No builtin parsers use this stage. Instead, it's an opportunity for any custom parsers to "win" and be the one chosen to parse a data type
 - Exact: This parser knows how to parse this exact data type. For example, a certain class, or when an object `is` a certain type
 - Fallback: The parser is a little more generic, and handles subclasses or other coerceable classes.
+- LastChance: Generically try to handle all classes
 
 For example, the [DictParser](./dict2any/parsers/dict.py) can_parse the following types in `Stage.Exact`:
 

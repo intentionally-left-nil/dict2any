@@ -8,10 +8,15 @@ from dict2any import parse
 
 
 class Custom:
-    pass
+    def __eq__(self, other):
+        return isinstance(other, Custom)
 
 
 custom = Custom()
+
+
+def my_function():
+    pass
 
 
 @dataclass
@@ -33,7 +38,8 @@ class Outer:
         (dict[str, int], {"a": 1, "b": 2}, {"a": 1, "b": 2}),
         (dict[str, dict[str, int]], {"a": {"b": 1}}, {"a": {"b": 1}}),
         (Outer, {"inner": {"inner": 1}, "outer": 2}, Outer(inner=Inner(inner=1), outer=2)),
-        (Custom, {}, ValueError),
+        (Custom, {}, Custom()),
+        (type(my_function), {}, ValueError),
     ],
 )
 def test_parse(field_type, data, expected):
