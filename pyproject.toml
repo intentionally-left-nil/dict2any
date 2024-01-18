@@ -35,6 +35,7 @@ exclude = [
   "/tests",
   "/typings"
 ]
+artifacts = ["*.pyi", "dict2any/py.typed"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["dict2any"]
