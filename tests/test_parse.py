@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 
 from dict2any import parse
+from dict2any.parsers import Parser
 
 
 class Custom:
@@ -48,3 +49,14 @@ def test_parse(field_type, data, expected):
             parse(field_type, data)
     else:
         assert parse(field_type, data) == expected
+
+
+def test_parse_with_custom_parser():
+    class CustomParser(Parser):
+        def can_parse(self, stage, path, field_type):
+            return True
+
+        def parse(self, path, field_type, data, subparse):
+            return "custom"
+
+    assert parse(str, {}, parsers=[CustomParser()]) == "custom"
