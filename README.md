@@ -32,7 +32,7 @@ print(config)
 
 ## Custom Parsing
 
-The `extra_parsers`argument lets you pass in additional parsers, to further customize or extend the functionality.
+The `parsers`argument lets you pass in additional parsers, to further customize or extend the functionality.
 
 To do so, you must implement the [Parser](./dict2any/parsers/parser.py) protocol. There are two methods: `can_parse`, and `parse` which you should implement. Take a look at any of the [builtin parsers](./dict2any/parsers/) for inspiration
 

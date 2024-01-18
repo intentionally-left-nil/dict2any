@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from random import shuffle
 from typing import Any, Type, TypeVar
 
@@ -22,30 +23,32 @@ from dict2any.parsers import (
     UnionParser,
 )
 
-PARSERS = [
-    BoolParser(),
-    FloatParser(),
-    IntParser(),
-    NoneParser(),
-    StringParser(),
-    AnyParser(),
-    DataclassParser(),
-    DictParser(),
-    TypedDictParser(),
-    ListParser(),
-    PathParser(),
-    NamedTupleParser(),
-    TupleParser(),
-    UnionParser(),
-    ClassParser(),
-]
+DEFAULT_PARSERS = frozenset(
+    [
+        BoolParser(),
+        FloatParser(),
+        IntParser(),
+        NoneParser(),
+        StringParser(),
+        AnyParser(),
+        DataclassParser(),
+        DictParser(),
+        TypedDictParser(),
+        ListParser(),
+        PathParser(),
+        NamedTupleParser(),
+        TupleParser(),
+        UnionParser(),
+        ClassParser(),
+    ]
+)
 
 
 T = TypeVar('T')
 
 
-def parse(cls: Type[T], data: Any, extra_parsers: list[Parser] | None = None) -> T:
-    parsers = PARSERS + (extra_parsers or [])
+def parse(cls: Type[T], data: Any, parsers: Sequence[Parser] | None = None) -> T:
+    parsers = [x for x in (parsers or DEFAULT_PARSERS)]
     shuffle(parsers)  # The ordering of the parsers should never matter, enforce that by randomizing the order 😈
 
     def subparse(path: JqPath, field_type: type, data: Any) -> Any:
