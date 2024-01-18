@@ -8,6 +8,7 @@ from dict2any.parsers import (
     BoolParser,
     FloatParser,
     IntParser,
+    NoneParser,
     Parser,
     Stage,
     StringParser,
@@ -26,6 +27,10 @@ class MyStr(str):
     pass
 
 
+def test_parser_name():
+    assert repr(BoolParser()) == "BoolParser"
+
+
 @pytest.mark.parametrize(
     ['parser', 'stage', 'field_type', 'expected'],
     [
@@ -33,11 +38,14 @@ class MyStr(str):
         (IntParser(), Stage.Exact, int, True),
         (FloatParser(), Stage.Exact, float, True),
         (StringParser(), Stage.Exact, str, True),
+        (NoneParser(), Stage.Exact, type(None), True),
         (StringParser(), Stage.Exact, int_list_type, False),
         (BoolParser(), Stage.Exact, int, False),
         (IntParser(), Stage.Exact, float, False),
         (FloatParser(), Stage.Exact, str, False),
         (StringParser(), Stage.Exact, list, False),
+        (NoneParser(), Stage.Exact, None, False),
+        (NoneParser(), Stage.Exact, [], False),
         (StringParser(), Stage.Fallback, MyStr, True),
         (StringParser(), Stage.Fallback, int_list_type, False),
         (StringParser(), Stage.Fallback, None, False),
@@ -63,6 +71,7 @@ def test_parse(path: JqPath, subparser: Mock):
     assert StringParser().parse(path=path, field_type=str, data="42", subparse=subparser) == "42"
     assert StringParser().parse(path=path, field_type=MyStr, data=MyStr("42"), subparse=subparser) == MyStr("42")
     assert StringParser().parse(path=path, field_type=MyStr, data=MyStr("42"), subparse=subparser) == MyStr("42")
+    assert NoneParser().parse(path=path, field_type=type(None), data=None, subparse=subparser) is None
 
 
 def test_parse_failure(path: JqPath, subparser: Mock):

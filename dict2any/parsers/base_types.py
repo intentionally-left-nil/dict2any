@@ -31,6 +31,9 @@ def create_base_parser(field_type: type) -> type[Parser]:
         def __init__(self):
             super().__init__(field_type)
 
+        def __repr__(self):
+            return f"{field_type.__name__.capitalize()}Parser"
+
     return P
 
 
@@ -38,3 +41,4 @@ BoolParser = create_base_parser(bool)
 IntParser = create_base_parser(int)
 FloatParser = create_base_parser(float)
 StringParser = create_base_parser(str)
+NoneParser = create_base_parser(type(None))
