@@ -8,6 +8,7 @@ class Stage(StrEnum):
     Override = auto()
     Exact = auto()
     Fallback = auto()
+    LastChance = auto()
 
 
 class Subparse(Protocol):
