@@ -51,5 +51,6 @@ def parse(cls: Type[T], data: Any, extra_parsers: list[Parser] | None = None) ->
             for parser in parsers:
                 if parser.can_parse(stage=stage, path=path, field_type=field_type):
                     return parser.parse(path=path, field_type=field_type, data=data, subparse=subparse)
+        raise ValueError(f'No parser found for {field_type} at {path}')
 
     return subparse(path=JqPath.parse('.'), field_type=cls, data=data)
