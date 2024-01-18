@@ -27,7 +27,7 @@ class ClassParser(Parser):
     def parse(self, *, path: JqPath, field_type: type, data: Any, subparse: Subparse) -> Any:
         if not isinstance(data, Mapping):
             raise ValueError(f"Invalid type: {type(data)}")
-        parameters = inspect.signature(field_type.__init__).parameters.items()
+        parameters = inspect.signature(field_type.__init__).parameters.items()  # type: ignore[misc]
         kwargs = (
             {k: v for k, v in data.items()}
             if any(p.kind is inspect.Parameter.VAR_KEYWORD for _, p in parameters)

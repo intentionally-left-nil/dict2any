@@ -50,6 +50,11 @@ class WithPositionalOnly:
         return isinstance(other, MyClass) and self.x == other.x and self.y == other.y and self.z == other.z
 
 
+class MySubclass(MyClass):
+    def __init__(self, a: int, b: str = "hello", *, c: Optional[int] = None):
+        super().__init__(x=a, y=b, z=c)
+
+
 empty = lambda x: x
 
 
@@ -59,6 +64,7 @@ empty = lambda x: x
         (Stage.LastChance, Simple, True),
         (Stage.LastChance, int, True),
         (Stage.LastChance, MyClass, True),
+        (Stage.LastChance, MySubclass, True),
         (Stage.LastChance, MyClassWithKwargs, True),
         (Stage.LastChance, WithPositionalOnly, False),
         (Stage.LastChance, type(empty), False),
@@ -84,6 +90,7 @@ def test_can_parse(stage: Stage, field_type: Any, expected: bool, path: JqPath):
             {"x": 5, "y": "hello", "unknown": "other"},
             MyClassWithKwargs(x=5, y="hello", unknown="other"),
         ),
+        (MySubclass, {"a": 5, "b": "hello"}, MySubclass(a=5, b="hello", c=None)),
     ],
 )
 def test_parse(field_type, data, expected, path: JqPath, subparser: Subparse):
