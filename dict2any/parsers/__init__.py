@@ -3,6 +3,7 @@ from dict2any.parsers.parser import (  # isort:skip
     Stage,
     Subparse,
 )
+from dict2any.parsers.any import AnyParser
 from dict2any.parsers.base_types import (
     BoolParser,
     FloatParser,
