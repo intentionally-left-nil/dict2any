@@ -33,10 +33,10 @@ class Outer:
         (dict[str, int], {"a": 1, "b": 2}, {"a": 1, "b": 2}),
         (dict[str, dict[str, int]], {"a": {"b": 1}}, {"a": {"b": 1}}),
         (Outer, {"inner": {"inner": 1}, "outer": 2}, Outer(inner=Inner(inner=1), outer=2)),
+        (Custom, {}, ValueError),
     ],
 )
 def test_parse(field_type, data, expected):
-    assert parse(field_type, data) == expected
     if isclass(expected) and issubclass(expected, BaseException):
         with pytest.raises(expected):
             parse(field_type, data)
